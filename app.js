@@ -7,11 +7,11 @@ const app = express();
 // * NodeMailer ===============================================================
 
 const miniOutlook = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
+  host: 'smtp.....email', // TODO: Cambiar el host y el puerto para GMail
   port: 587,
   auth: {
-    user: 'olin.homenick@ethereal.email',
-    pass: 'NyqmM24VxJmk7CKv6R',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
