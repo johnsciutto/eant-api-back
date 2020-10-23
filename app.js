@@ -1,18 +1,41 @@
 const express = require('express');
-
-const puerto = 2000;
+const nodemailer = require('nodemailer');
 
 const app = express();
 
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+// * NodeMailer ===============================================================
 
-app.listen(puerto);
-
-app.get('/', (req, res) => {
-  res.end('Este es un formulario de contacto');
+const miniOutlook = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+    user: 'olin.homenick@ethereal.email',
+    pass: 'NyqmM24VxJmk7CKv6R',
+  },
 });
 
-app.post('/end', (req, res) => {
-  console.log(req.body);
-});
+// * Express ==================================================================
+app
+  // ?------------------------------------------------------------------ Config
+  .use(express.static('public'))
+  .use(express.urlencoded({ extended: true }))
+
+// ?--------------------------------------------------------------- Rutas GET
+  .get('/', (req, res) => { res.redirect('/contacto.html'); })
+
+  // ?-------------------------------------------------------------- Rutas POST
+  .post('/enviar', (req, res) => {
+    const contacto = req.body;
+
+    miniOutlook.sendMail({
+      from: contacto.correo,
+      to: 'john@johnsciutto.com',
+      subject: `Asunto #${contacto.asunto}`,
+      html: `<blockquote>${contacto.mensaje}</blockquote>`,
+    });
+
+    res.send('Mensaje enviado!');
+  })
+
+  // ?------------------------------------------------------------------ Listen
+  .listen(2000, () => console.log('Servidor funcionando en el puerto 2000.'));
