@@ -4,10 +4,12 @@ const puerto = 2000;
 
 const app = express();
 
-app.listen(puerto);
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/contacto', (req, res) => {
+app.listen(puerto);
+
+app.get('/', (req, res) => {
   res.end('Este es un formulario de contacto');
 });
 
