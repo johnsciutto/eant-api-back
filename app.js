@@ -7,7 +7,7 @@ const app = express();
 // * NodeMailer ===============================================================
 
 const miniOutlook = nodemailer.createTransport({
-  host: 'smtp.....email', // TODO: Cambiar el host y el puerto para GMail
+  host: process.env.EMAIL_HOST, // TODO: Cambiar el host y el puerto para GMail
   port: 587,
   auth: {
     user: process.env.EMAIL_USER,
