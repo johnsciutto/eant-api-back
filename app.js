@@ -16,27 +16,26 @@ const miniOutlook = nodemailer.createTransport({
 });
 
 // * Express ==================================================================
-app
-  // ?------------------------------------------------------------------ Config
-  .use(express.static('public'))
-  .use(express.urlencoded({ extended: true }))
+// ?------------------------------------------------------------------ Config
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 // ?--------------------------------------------------------------- Rutas GET
-  .get('/', (req, res) => { res.redirect('/contacto.html'); })
+app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
-  // ?-------------------------------------------------------------- Rutas POST
-  .post('/enviar', (req, res) => {
-    const contacto = req.body;
+// ?-------------------------------------------------------------- Rutas POST
+app.post('/enviar', (req, res) => {
+  const contacto = req.body;
 
-    miniOutlook.sendMail({
-      from: contacto.correo,
-      to: 'john@johnsciutto.com',
-      subject: `Asunto #${contacto.asunto}`,
-      html: `<blockquote>${contacto.mensaje}</blockquote>`,
-    });
+  miniOutlook.sendMail({
+    from: contacto.correo,
+    to: 'john@johnsciutto.com',
+    subject: `Asunto #${contacto.asunto}`,
+    html: `<blockquote>${contacto.mensaje}</blockquote>`,
+  });
 
-    res.send('Mensaje enviado!');
-  })
+  res.send('Mensaje enviado!');
+});
 
-  // ?------------------------------------------------------------------ Listen
-  .listen(2000, () => console.log('Servidor funcionando en el puerto 2000.'));
+// ?------------------------------------------------------------------ Listen
+app.listen(2000, () => console.log('Servidor funcionando en el puerto 2000.'));
