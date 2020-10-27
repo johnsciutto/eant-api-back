@@ -6,12 +6,12 @@ const app = express();
 
 // * NodeMailer ===============================================================
 
-const miniOutlook = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // TODO: Cambiar el host y el puerto para GMail
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
   port: 587,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: 'melisa47@ethereal.email',
+    pass: 'jGCnUdsFttUj4TeRvY',
   },
 });
 
@@ -24,18 +24,22 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
 // ?-------------------------------------------------------------- Rutas POST
-app.post('/enviar', (req, res) => {
-  const contacto = req.body;
+app.post('/enviar', async (req, res) => {
+  try {
+    const contacto = req.body;
 
-  miniOutlook.sendMail({
-    from: contacto.correo,
-    to: 'john@johnsciutto.com',
-    subject: `Asunto #${contacto.asunto}`,
-    html: `<blockquote>${contacto.mensaje}</blockquote>`,
-  });
+    transporter.sendMail({
+      from: contacto.correo,
+      to: 'john@johnsciutto.com',
+      subject: `Asunto: ${contacto.asunto}`,
+      html: `<blockquote>${contacto.mensaje}</blockquote>`,
+    });
 
-  res.send('Mensaje enviado!');
+    res.send('Mensaje enviado!');
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 // ?------------------------------------------------------------------ Listen
-app.listen(2000, () => console.log('Servidor funcionando en el puerto 2000.'));
+app.listen(3000, () => console.log('Servidor funcionando en el puerto 2000.'));
