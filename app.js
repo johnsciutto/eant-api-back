@@ -1,8 +1,19 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const joi = require('joi');
 require('dotenv').config();
 
 const app = express();
+
+const schema = joi.object({
+  nombre: joi.string(),
+  apellido: joi.string(),
+  correo: joi.string().email({ minDomainSegments: 2 }),
+  asunto: joi.number().integer(),
+  archivo: joi.string(),
+  mensaje: joi.string(),
+
+});
 
 // * NodeMailer ===============================================================
 
@@ -15,31 +26,34 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// * Express ==================================================================
-// ?------------------------------------------------------------------ Config
+// * Express =====================================================================
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
-// ?--------------------------------------------------------------- Rutas GET
 app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
-// ?-------------------------------------------------------------- Rutas POST
 app.post('/enviar', async (req, res) => {
   try {
     const contacto = req.body;
 
-    transporter.sendMail({
-      from: contacto.correo,
-      to: 'john@johnsciutto.com',
-      subject: `Asunto: ${contacto.asunto}`,
-      html: `<blockquote>${contacto.mensaje}</blockquote>`,
-    });
+    const { error, value } = schema.validate(contacto);
 
-    res.send('Mensaje enviado!');
+    if (error) console.log(error);
+
+    // Mandar mail solo si no hay un error existe.
+    if (!error) {
+      transporter.sendMail({
+        from: contacto.correo,
+        to: 'john@johnsciutto.com',
+        subject: `Asunto: ${contacto.asunto}`,
+        html: `<blockquote>${contacto.mensaje}</blockquote><br><blockquote>${contacto.archivo}</blockquote>`,
+      });
+
+      res.send('Mensaje enviado!');
+    }
   } catch (err) {
     console.log(err);
   }
 });
 
-// ?------------------------------------------------------------------ Listen
-app.listen(3000, () => console.log('Servidor funcionando en el puerto 2000.'));
+app.listen(3000, () => console.log('Servidor funcionando en el puerto 3000.'));

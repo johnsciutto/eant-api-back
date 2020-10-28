@@ -13,7 +13,12 @@
   <form action="/enviar" method="post">
     ​
     <label for="nombre">Ingrese su nombre:</label>
-    <input class="form-control" type="text" name="nombre" placeholder="Ej: Obi Juan Kenobi">
+    <input class="form-control" type="text" name="nombre" placeholder="Ej: Obi Juan">
+
+    <br>
+
+    <label for="apellido">Ingrese su apellido:</label>
+    <input class="form-control" type="text" name="apellido" placeholder="Ej: Kenobi">
 
     <br>
     ​
@@ -24,20 +29,25 @@
     ​
     <label for="asunto">Elija su asunto:</label>
     <select class="form-control" name="asunto">
-      <option value="consulta">Consulta</option>
-      <option value="pedido">Pedido</option>
-      <option value="sugerencia">Sugerencia</option>
-      <option value="reclamo">Reclamo</option>
+      <option value="1">Consulta</option>
+      <option value="2">Pedido</option>
+      <option value="3">Sugerencia</option>
+      <option value="4">Reclamo</option>
     </select>
     ​
     <br>
     ​
+    <label for="archivo">Ingrese su archivo:</label>
+    <input class="form-control" type="text" name="archivo" placeholder="Ej: ejemplo.md">
+
+    <br>
+
     <label for="mensaje">Ingrese su mensaje:</label>
     <textarea class="form-control" name="mensaje" cols="30" rows="10" placeholder="Max: 100 caracteres"></textarea>
     ​
     <br>
     ​
-    <input class="btn btn-primary" type="submit" value="Done!">
+    <input class="btn btn-primary" type="submit" value="Enviar!">
     ​
   </form>
 </body>
