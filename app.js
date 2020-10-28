@@ -18,11 +18,11 @@ const schema = joi.object({
 // * NodeMailer ===============================================================
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
-  port: 587,
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
   auth: {
-    user: 'melisa47@ethereal.email',
-    pass: 'jGCnUdsFttUj4TeRvY',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -34,19 +34,22 @@ app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
 app.post('/enviar', async (req, res) => {
   try {
-    const contacto = req.body;
+    const { error, value } = schema.validate(req.body);
 
-    const { error, value } = schema.validate(contacto);
+    const {
+      correo, asunto, mensaje, archivo,
+    } = req.body;
 
     if (error) console.log(error);
 
     // Mandar mail solo si no hay un error existe.
     if (!error) {
       transporter.sendMail({
-        from: contacto.correo,
-        to: 'john@johnsciutto.com',
-        subject: `Asunto: ${contacto.asunto}`,
-        html: `<blockquote>${contacto.mensaje}</blockquote><br><blockquote>${contacto.archivo}</blockquote>`,
+        from: correo,
+        to: process.env.EMAIL_PERSONAL,
+        replyTo: correo,
+        subject: `Asunto: ${asunto}`,
+        html: `<blockquote>${mensaje}</blockquote><br><blockquote>${archivo}</blockquote>`,
       });
 
       res.send('Mensaje enviado!');
