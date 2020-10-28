@@ -3,8 +3,7 @@ const nodemailer = require('nodemailer');
 const joi = require('joi');
 require('dotenv').config();
 
-const app = express();
-
+// * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
   nombre: joi.string(),
   apellido: joi.string(),
@@ -15,8 +14,7 @@ const schema = joi.object({
 
 });
 
-// * NodeMailer ===============================================================
-
+// * Configuracion de un transporter para mandar emails
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
@@ -26,7 +24,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// * Express =====================================================================
+// * Configuracion y Rutas de Express
+const puerto = process.env.PORT || 3000;
+const app = express();
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,22 +34,27 @@ app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
 app.post('/enviar', async (req, res) => {
   try {
-    const { error, value } = schema.validate(req.body);
+    // ? Validando los datos del formulario
+    const { error: errorDeValidacion } = schema.validate(req.body);
 
+    // ? Desestructurando las variables del req.body
     const {
       correo, asunto, mensaje, archivo,
     } = req.body;
 
-    if (error) console.log(error);
+    // ? Si hay un error de validacion del formulario, logear el problema
+    if (errorDeValidacion) console.log(errorDeValidacion);
 
-    // Mandar mail solo si no hay un error existe.
-    if (!error) {
+    // ? Si no hay un error de validacion del formulario:
+    // ?    - mandar el formulario a mi correo
+    // ?    - mandar un mensaje al usuario diciendo "Mensaje enviado!"
+    if (!errorDeValidacion) {
       transporter.sendMail({
         from: correo,
         to: process.env.EMAIL_PERSONAL,
         replyTo: correo,
         subject: `Asunto: ${asunto}`,
-        html: `<blockquote>${mensaje}</blockquote><br><blockquote>${archivo}</blockquote>`,
+        html: `<p>${mensaje}</p><br><p>${archivo}</p>`,
       });
 
       res.send('Mensaje enviado!');
@@ -59,4 +64,4 @@ app.post('/enviar', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Servidor funcionando en el puerto 3000.'));
+app.listen(puerto, () => console.log(`Servidor funcionando en el puerto ${puerto}...`));
