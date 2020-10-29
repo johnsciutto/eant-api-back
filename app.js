@@ -4,13 +4,12 @@ const joi = require('joi');
 
 // * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
-  nombre: joi.string().required(),
+  nombre: joi.string().max(30).required(),
   apellido: joi.string().required(),
   correo: joi.string().email({ minDomainSegments: 2 }).required(),
   asunto: joi.number().integer().required(),
   archivo: joi.string().required(),
   mensaje: joi.string().required(),
-
 });
 
 // * Configuracion de un transporter para mandar emails
@@ -41,8 +40,10 @@ app.post('/enviar', async (req, res) => {
       correo, asunto, mensaje, archivo,
     } = req.body;
 
-    // ? Si hay un error de validacion del formulario, logear el problema
-    if (errorDeValidacion) console.log(errorDeValidacion);
+    // ? Si hay un error de validacion del formulario, mandar el problema al front
+    if (errorDeValidacion) {
+      res.send(`${errorDeValidacion.details[0].message}`);
+    }
 
     // ? Si no hay un error de validacion del formulario:
     // ?    - mandar el formulario a mi correo
