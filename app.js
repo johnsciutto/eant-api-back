@@ -1,16 +1,15 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const joi = require('joi');
-require('dotenv').config();
 
 // * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
-  nombre: joi.string(),
-  apellido: joi.string(),
-  correo: joi.string().email({ minDomainSegments: 2 }),
-  asunto: joi.number().integer(),
-  archivo: joi.string(),
-  mensaje: joi.string(),
+  nombre: joi.string().required(),
+  apellido: joi.string().required(),
+  correo: joi.string().email({ minDomainSegments: 2 }).required(),
+  asunto: joi.number().integer().required(),
+  archivo: joi.string().required(),
+  mensaje: joi.string().required(),
 
 });
 
