@@ -1,6 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const joi = require('joi');
+const fileUpload = require('express-fileupload');
 
 // * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
@@ -8,7 +9,6 @@ const schema = joi.object({
   apellido: joi.string().required(),
   correo: joi.string().email({ minDomainSegments: 2 }).required(),
   asunto: joi.number().integer().required(),
-  archivo: joi.string().required(),
   mensaje: joi.string().required(),
 });
 
@@ -27,6 +27,7 @@ const puerto = process.env.PORT || 3000;
 const app = express();
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload());
 
 app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
@@ -37,12 +38,14 @@ app.post('/enviar', async (req, res) => {
 
     // ? Desestructurando las variables del req.body
     const {
-      correo, asunto, mensaje, archivo,
+      correo, asunto, mensaje,
     } = req.body;
+
+    const archivo = req.files;
 
     // ? Si hay un error de validacion del formulario, mandar el problema al front
     if (errorDeValidacion) {
-      res.send(`${errorDeValidacion.details[0].message}`);
+      res.send(`${errorDeValidacion.message}`);
     }
 
     // ? Si no hay un error de validacion del formulario:
@@ -54,7 +57,7 @@ app.post('/enviar', async (req, res) => {
         to: process.env.EMAIL_PERSONAL,
         replyTo: correo,
         subject: `Asunto: ${asunto}`,
-        html: `<p>${mensaje}</p><br><p>${archivo}</p>`,
+        html: `<p>${mensaje}</p><br>`,
       });
 
       res.send('Mensaje enviado!');

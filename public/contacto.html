@@ -10,7 +10,7 @@
 
 <body class="container">
   <h1>Formulario HTML</h1>
-  <form action="/enviar" method="post">
+  <form action="/enviar" method="post" enctype="multipart/form-data">
     ​
     <label for="nombre">Ingrese su nombre:</label>
     <input class="form-control" type="text" name="nombre" placeholder="Ej: Obi Juan">
@@ -38,7 +38,7 @@
     <br>
     ​
     <label for="archivo">Ingrese su archivo:</label>
-    <input class="form-control" type="text" name="archivo" placeholder="Ej: ejemplo.md">
+    <input class="form-control" type="file" name="archivo">
 
     <br>
 
