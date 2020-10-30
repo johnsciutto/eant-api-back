@@ -41,7 +41,15 @@ app.post('/enviar', async (req, res) => {
       correo, asunto, mensaje,
     } = req.body;
 
-    const archivo = req.files;
+    // ? Desestructurando la variable del req.files
+    const { archivo } = req.files;
+
+    // ? Si hay un archivo, mover el archivo a /public/uploads
+    if (archivo) {
+      archivo.mv(`${__dirname}/public/uploads/${archivo.name}`, (err) => {
+        if (err) console.log(err);
+      });
+    }
 
     // ? Si hay un error de validacion del formulario, mandar el problema al front
     if (errorDeValidacion) {
