@@ -52,9 +52,7 @@ app.post('/enviar', async (req, res) => {
     }
 
     // ? Si hay un error de validacion del formulario, mandar el problema al front
-    if (errorDeValidacion) {
-      res.send(`${errorDeValidacion.message}`);
-    }
+    if (errorDeValidacion) res.send(`${errorDeValidacion.message}`);
 
     // ? Si no hay un error de validacion del formulario:
     // ?    - mandar el formulario a mi correo
