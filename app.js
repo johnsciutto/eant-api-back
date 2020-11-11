@@ -22,25 +22,16 @@ app.get('/', (req, res) => { res.redirect('/contacto.html'); });
 
 app.post('/enviar', async (req, res) => {
   try {
-    // ? Validando los datos del formulario
     const { error: errorDeValidacion } = schema.validate(req.body, { abortEarly: false });
-
-    // ? Desestructurando las variables del req.body
-    const {
-      correo, asunto, mensaje,
-    } = req.body;
-
-    // ? Desestructurando la variable del req.files
+    const { correo, asunto, mensaje } = req.body;
     const { archivo } = req.files;
 
-    // ? Si hay un archivo, mover el archivo a /public/uploads
     if (archivo) {
       archivo.mv(`${__dirname}/public/uploads/${archivo.name}`, (err) => {
         if (err) console.log(err);
       });
     }
 
-    // ? Si hay un error de validacion del formulario, mandar el problema al front
     if (errorDeValidacion) {
       const msg = {
         ok: false,
@@ -49,9 +40,6 @@ app.post('/enviar', async (req, res) => {
       res.send(`${msg}`);
     }
 
-    // ? Si no hay un error de validacion del formulario:
-    // ?    - mandar el formulario a mi correo
-    // ?    - mandar un mensaje al usuario diciendo "Mensaje enviado!"
     if (!errorDeValidacion) {
       transporter.sendMail({
         from: correo,
