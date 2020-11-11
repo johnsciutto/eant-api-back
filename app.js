@@ -1,20 +1,12 @@
 const express = require('express');
 const joi = require('joi');
 const fileUpload = require('express-fileupload');
-const { MongoClient } = require('mongodb');
 const { transporter, EMAIL_PERSONAL } = require('./email');
+const { openCollection, MOVIES_COLLECTION, SERIES_COLLECTION } = require('./db');
 
 const {
   PORT,
-  DB_NAME,
-  DB_USER,
-  DB_PASS,
-  DB_HOST,
-  MOVIES_COLLECTION,
-  SERIES_COLLECTION,
 } = process.env;
-
-const DB_URL = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}?retryWrites=true&w=majority`;
 
 // * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
@@ -26,7 +18,7 @@ const schema = joi.object({
 });
 
 // * Configuracion y Rutas de Express
-const puerto = PORT || 2000;
+const puerto = PORT || 3000;
 const app = express();
 const API_V1 = express.Router();
 app.use('/api/v1', API_V1);
@@ -83,22 +75,6 @@ app.post('/enviar', async (req, res) => {
     console.log(err);
   }
 });
-
-const openCollection = async (collection, cb) => {
-  try {
-    const client = new MongoClient(DB_URL, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
-    await client.connect();
-    const database = client.db(DB_NAME);
-    const col = database.collection(collection);
-    await cb(col);
-    client.close();
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 API_V1.route('/peliculas')
   .get(async (req, res) => {
