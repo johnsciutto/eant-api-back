@@ -3,13 +3,17 @@ const fileUpload = require('express-fileupload');
 const { transporter, EMAIL_PERSONAL } = require('./email');
 const { schema } = require('./form-validation');
 
-const API_V1 = express.Router();
-require('./api-v1')(API_V1);
+const MOVIE_API_V1 = express.Router();
+require('./routes/api/movies-v1')(MOVIE_API_V1);
+
+const SERIES_API_V1 = express.Router();
+require('./routes/api/series-v1')(SERIES_API_V1);
 
 // * Configuracion y Rutas de Express
 const puerto = process.env.PORT || 3000;
 const app = express();
-app.use('/api/v1', API_V1);
+app.use('/api/v1', MOVIE_API_V1);
+app.use('/api/v1', SERIES_API_V1);
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());
