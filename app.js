@@ -1,16 +1,11 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
 const joi = require('joi');
 const fileUpload = require('express-fileupload');
 const { MongoClient } = require('mongodb');
+const { transporter, EMAIL_PERSONAL } = require('./email');
 
 const {
   PORT,
-  EMAIL_HOST,
-  EMAIL_PASS,
-  EMAIL_PERSONAL,
-  EMAIL_PORT,
-  EMAIL_USER,
   DB_NAME,
   DB_USER,
   DB_PASS,
@@ -30,18 +25,8 @@ const schema = joi.object({
   mensaje: joi.string().required(),
 });
 
-// * Configuracion de un transporter para mandar emails
-const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: EMAIL_PORT,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-});
-
 // * Configuracion y Rutas de Express
-const puerto = PORT || 3000;
+const puerto = PORT || 2000;
 const app = express();
 const API_V1 = express.Router();
 app.use('/api/v1', API_V1);
