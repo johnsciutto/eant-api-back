@@ -1,6 +1,6 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const { transporter, EMAIL_PERSONAL } = require('./email');
+const { transporter, EMAIL_PERSONAL } = require('./email-transporter');
 const { schema } = require('./form-validation');
 
 const MOVIE_API_V1 = express.Router();
