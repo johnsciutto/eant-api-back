@@ -6,11 +6,20 @@ const { MongoClient } = require('mongodb');
 
 const {
   PORT,
+  EMAIL_HOST,
+  EMAIL_PASS,
+  EMAIL_PERSONAL,
+  EMAIL_PORT,
+  EMAIL_USER,
   DB_NAME,
-  DB_URL,
+  DB_USER,
+  DB_PASS,
+  DB_HOST,
   MOVIES_COLLECTION,
   SERIES_COLLECTION,
 } = process.env;
+
+const DB_URL = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}?retryWrites=true&w=majority`;
 
 // * Configuracion de un objeto modelo para validar datos
 const schema = joi.object({
@@ -23,11 +32,11 @@ const schema = joi.object({
 
 // * Configuracion de un transporter para mandar emails
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
+  host: EMAIL_HOST,
+  port: EMAIL_PORT,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
   },
 });
 
@@ -77,7 +86,7 @@ app.post('/enviar', async (req, res) => {
     if (!errorDeValidacion) {
       transporter.sendMail({
         from: correo,
-        to: process.env.EMAIL_PERSONAL,
+        to: EMAIL_PERSONAL,
         replyTo: correo,
         subject: `Asunto: ${asunto}`,
         html: `<p>${mensaje}</p><br>`,
@@ -92,15 +101,15 @@ app.post('/enviar', async (req, res) => {
 
 const openCollection = async (collection, cb) => {
   try {
-    const dbClient = new MongoClient(DB_URL, {
+    const client = new MongoClient(DB_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     });
-    await dbClient.connect();
-    const database = dbClient.db(DB_NAME);
+    await client.connect();
+    const database = client.db(DB_NAME);
     const col = database.collection(collection);
     await cb(col);
-    dbClient.close();
+    client.close();
   } catch (err) {
     console.log(err);
   }
