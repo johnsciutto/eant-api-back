@@ -1,6 +1,12 @@
-const { openCollection, MOVIES_COLLECTION } = require('../../db');
+const { ObjectId } = require('mongodb');
+const express = require('express');
+const { openCollection, MOVIES_COLLECTION, isValidId } = require('../../db');
+
+const { DELETE_PASSWORD } = process.env;
 
 module.exports = (app) => {
+  app.use(express.urlencoded({ extended: true }));
+
   app.route('/peliculas')
     .get(async (req, res) => {
       try {
@@ -26,12 +32,18 @@ module.exports = (app) => {
       }
     })
 
-  // TODO: Implementar (preferiblemente con autenticacion)
     .delete(async (req, res) => {
-      try {
-        res.send('La operacion para borrar todas las peliculas todavia no fue implementada...');
-      } catch (error) {
-        console.log(error);
+      if (req.body.password && req.body.password === DELETE_PASSWORD) {
+        try {
+          openCollection(MOVIES_COLLECTION, async (collection) => {
+            const result = await collection.deleteMany({});
+            res.send(`${result.deletedCount} peliculas fueron borradas con exito`);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        res.send('No tenes la autorizacion para eliminar todas las peliculas');
       }
     });
 
@@ -40,8 +52,8 @@ module.exports = (app) => {
       try {
         openCollection(MOVIES_COLLECTION, async (collection) => {
           const cursor = await collection
-            .find({ $text: { $search: req.params.pelicula } })
-            .project({ _id: 0 });
+            .find({ $text: { $search: req.params.pelicula } });
+            // .project({ _id: 0 });
           const result = await cursor.toArray();
           if (result.length) res.send(result);
           else res.send('No se encontro ninguna pelicula por ese nombre');
@@ -51,12 +63,41 @@ module.exports = (app) => {
       }
     })
 
-  // TODO: Implementar
-    .put()
+    .put(async (req, res) => {
+      const id = req.params.pelicula;
+      if (!isValidId(id)) {
+        const error = 'El ID es invalido';
+        res.send(error);
+        throw new Error(error);
+      } else {
+        const filterObject = { _id: ObjectId(id) };
+        try {
+          openCollection(MOVIES_COLLECTION, async (collection) => {
+            const { result } = await collection.updateOne(filterObject, { $set: { ...req.body } });
+            if (result.ok) res.send('Pelicula actualizada exitosamente');
+            else res.send('Error al actualizar la pelicula');
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    })
 
-  // TODO: Implementar
-    .patch()
-
-  // TODO: Implementar (preferiblemente con autenticacion)
-    .delete();
+    .delete(async (req, res) => {
+      const id = req.params.pelicula;
+      if (!isValidId(id)) res.send('Id es invalido');
+      const filterObject = { _id: ObjectId(id) };
+      try {
+        openCollection(MOVIES_COLLECTION, async (collection) => {
+          const result = await collection.deleteOne(filterObject);
+          if (!result.deletedCount) {
+            res.send('Error al borrar la pelicula');
+          } else {
+            res.send('Pelicula borrada exitosamente');
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    });
 };

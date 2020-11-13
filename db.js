@@ -27,4 +27,11 @@ const openCollection = async (collection, cb) => {
   }
 };
 
-module.exports = { openCollection, MOVIES_COLLECTION, SERIES_COLLECTION };
+const isValidId = (id) => {
+  const regEx = /^[0-9a-fA-F]{24}$/;
+  return regEx.test(id);
+};
+
+module.exports = {
+  openCollection, MOVIES_COLLECTION, SERIES_COLLECTION, isValidId,
+};
