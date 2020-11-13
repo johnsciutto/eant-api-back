@@ -1,5 +1,3 @@
-const { openCollection, SERIES_COLLECTION } = require('../../db');
-
 module.exports = (app) => {
   app.route('/series')
     .get(async (req, res) => {
