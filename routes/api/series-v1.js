@@ -1,3 +1,4 @@
+// TODO: Cambiar esto para que sea como movies-v1.js
 module.exports = (app) => {
   app.route('/series')
     .get(async (req, res) => {

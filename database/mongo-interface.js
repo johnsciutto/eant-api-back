@@ -56,6 +56,7 @@ const sanitizeItem = (item, collectionName) => {
       title: item.title,
       year: parseInt(item.year, 10),
       rating: parseFloat(item.rating, 10),
+      genere: item.genere,
     };
   }
   if (collectionName === SERIES_COLLECTION) {
@@ -115,7 +116,7 @@ const findByRange = async (item, collectionName) => {
   return result.length ? result : errors.noFoundDocument;
 };
 
-const findByTitle = async (item, collectionName) => {
+const findByString = async (item, collectionName) => {
   const { client, collection } = await openCollection(collectionName);
   const cursor = await collection.find({ $text: { $search: item } });
   const result = await cursor.toArray();
@@ -189,7 +190,7 @@ const deleteItemsGivenString = async (filter, collectionName) => {
 };
 
 const deleteManyItems = async (filter, collectionName) => {
-  if (isValidYear(filter)) {
+  if (isValidYear(filTitleter)) {
     return deleteItemsGivenYear(filter, collectionName);
   }
   if (isValidRating(filter)) {
@@ -214,7 +215,7 @@ const createInstance = (collectionName) => ({
     if (isValidRangeOfRatings(item)) return findByRange(item, collectionName);
     if (isValidYear(item)) return findByYear(item, collectionName);
     if (isRequestingCount(item)) return countMovies(collectionName);
-    return findByTitle(item, collectionName);
+    return findByString(item, collectionName);
   },
 
   async insert(movieObj) {
