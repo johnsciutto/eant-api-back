@@ -56,7 +56,7 @@ const sanitizeItem = (item, collectionName) => {
       title: item.title,
       year: parseInt(item.year, 10),
       rating: parseFloat(item.rating, 10),
-      genere: item.genere,
+      genre: item.genre,
     };
   }
   if (collectionName === SERIES_COLLECTION) {
@@ -227,7 +227,7 @@ const createInstance = (collectionName) => ({
   },
 
   async update(filter, changes) {
-    const [object] = await this.find(filter, collectionName);
+    const object = await this.find(filter, collectionName);
     const changesObj = sanitizeItem(changes, collectionName);
     const { client, collection } = await openCollection(collectionName);
     const { modifiedCount } = await collection.updateOne(object, { $set: { ...changesObj } });
