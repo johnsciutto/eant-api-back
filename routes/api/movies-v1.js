@@ -3,6 +3,7 @@ const { Movies } = require('../../database/mongo-interface');
 
 module.exports = (app) => {
   app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
 
   app.route('/peliculas')
     .get(async (req, res) => {
