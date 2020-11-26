@@ -206,52 +206,55 @@ const deleteAllItems = async (collectionName) => {
   return result;
 };
 
-const createInstance = (collectionName) => ({
+class DatabaseInstance {
+  constructor(collection) {
+    this.collection = collection;
+  }
 
   async find(item = {}) {
-    if (isEmptyObject(item)) return findAllItems(collectionName);
-    if (isValidId(item)) return findById(item, collectionName);
-    if (isValidRating(item)) return findByRating(item, collectionName);
-    if (isValidRangeOfRatings(item)) return findByRange(item, collectionName);
-    if (isValidYear(item)) return findByYear(item, collectionName);
-    if (isRequestingCount(item)) return countMovies(collectionName);
-    return findByString(item, collectionName);
-  },
+    if (isEmptyObject(item)) return findAllItems(this.collection);
+    if (isValidId(item)) return findById(item, this.collection);
+    if (isValidRating(item)) return findByRating(item, this.collection);
+    if (isValidRangeOfRatings(item)) return findByRange(item, this.collection);
+    if (isValidYear(item)) return findByYear(item, this.collection);
+    if (isRequestingCount(item)) return countMovies(this.collection);
+    return findByString(item, this.collection);
+  }
 
   async insert(movieObj) {
-    const parsedObj = sanitizeItem(movieObj, collectionName);
-    const { client, collection } = await openCollection(collectionName);
-    const { insertedCount, insertedId } = await collection.insertOne(parsedObj, collectionName);
+    const parsedObj = sanitizeItem(movieObj, this.collection);
+    const { client, collection } = await openCollection(this.collection);
+    const { insertedCount, insertedId } = await collection.insertOne(parsedObj, this.collection);
     await client.close();
     return insertedCount ? `New document id: ${insertedId}` : errors.noDocumentAdded;
-  },
+  }
 
   async update(filter, changes) {
-    const object = await this.find(filter, collectionName);
-    const changesObj = sanitizeItem(changes, collectionName);
-    const { client, collection } = await openCollection(collectionName);
+    const object = await this.find(filter, this.collection);
+    const changesObj = sanitizeItem(changes, this.collection);
+    const { client, collection } = await openCollection(this.collection);
     const { modifiedCount } = await collection.updateOne(object, { $set: { ...changesObj } });
     await client.close();
     return modifiedCount ? `${modifiedCount} item modified successfully` : errors.noDocumentModified;
-  },
+  }
 
   async delete(filter, flag = 'DELETE-ONE') {
     let numItemsDeleted;
     if (filter === 'DELETE-ALL' && flag === DELETE_PASSWORD) {
-      numItemsDeleted = await deleteAllItems(collectionName);
+      numItemsDeleted = await deleteAllItems(this.collection);
     } if (flag === 'DELETE-MANY') {
-      numItemsDeleted = await deleteManyItems(filter, collectionName);
+      numItemsDeleted = await deleteManyItems(filter, this.collection);
     } if (filter && flag === 'DELETE-ONE') {
-      numItemsDeleted = await deleteOneItem(filter, collectionName);
+      numItemsDeleted = await deleteOneItem(filter, this.collection);
     } if (!filter) {
       return errors.mustSpecifyValidParameter;
     }
     if (numItemsDeleted) return `${numItemsDeleted} item(s) deleted successfully.`;
     if (!numItemsDeleted) return errors.noDocumentDeleted;
-  },
-});
+  }
+}
 
-const Movies = createInstance(MOVIES_COLLECTION);
-const Series = createInstance(SERIES_COLLECTION);
+const Movies = new DatabaseInstance(MOVIES_COLLECTION);
+const Series = new DatabaseInstance(SERIES_COLLECTION);
 
 module.exports = { Movies, Series };

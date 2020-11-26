@@ -4,6 +4,9 @@ const { Movies, Series } = require('../database/mongo-interface');
 const createAPI = (databaseCollection) => {
   const app = express.Router();
 
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+
   app.route('/')
     .get(async (req, res) => {
       try {
@@ -66,7 +69,7 @@ const createAPI = (databaseCollection) => {
   return app;
 };
 
-const movieAPI = createAPI(Movies);
 const seriesAPI = createAPI(Series);
+const movieAPI = createAPI(Movies);
 
 module.exports = { movieAPI, seriesAPI };
