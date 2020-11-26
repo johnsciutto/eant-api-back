@@ -1,5 +1,5 @@
 const express = require('express');
-const { Movies, Series } = require('../database/mongo-interface');
+const { Movies, Series } = require('../mongo-interface');
 
 const createAPI = (databaseCollection) => {
   const app = express.Router();
