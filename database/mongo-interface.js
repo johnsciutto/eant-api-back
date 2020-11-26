@@ -190,7 +190,7 @@ const deleteItemsGivenString = async (filter, collectionName) => {
 };
 
 const deleteManyItems = async (filter, collectionName) => {
-  if (isValidYear(filTitleter)) {
+  if (isValidYear(filter)) {
     return deleteItemsGivenYear(filter, collectionName);
   }
   if (isValidRating(filter)) {
