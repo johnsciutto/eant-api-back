@@ -17,5 +17,4 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-module.exports = transporter;
-module.exports = EMAIL_PERSONAL;
+module.exports = { transporter, EMAIL_PERSONAL };
