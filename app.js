@@ -7,17 +7,16 @@ const mainRoute = require('./routes/main');
 
 const puerto = process.env.PORT || 3000;
 
-// * Configuracion y Rutas de Express
-const app = express();
-
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload());
-
-app.use('/', mainRoute);
-app.use('/enviar', contactRoute);
-app.use('/api/v1/auth', authRoute);
-app.use('/api/v1/peliculas', movieAPI);
-app.use('/api/v1/series', seriesAPI);
-
-app.listen(puerto, () => console.log(`Servidor funcionando en el puerto ${puerto}...`));
+express()
+// * Configuraciones
+  .use(express.static('public'))
+  .use(express.urlencoded({ extended: true }))
+  .use(fileUpload())
+// * Rutas
+  .use('/', mainRoute)
+  .use('/enviar', contactRoute)
+  .use('/api/v1/auth', authRoute)
+  .use('/api/v1/peliculas', movieAPI)
+  .use('/api/v1/series', seriesAPI)
+// * Listen
+  .listen(puerto, () => console.log(`Servidor funcionando en el puerto ${puerto}...`));
