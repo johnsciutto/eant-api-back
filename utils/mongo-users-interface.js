@@ -75,29 +75,25 @@ const getUser = async (str) => {
   return user;
 };
 
-const hasAccess = async (str) => {
-  const user = await getUser(str);
-  return user.access;
+const hasAccess = async (usr) => usr.access;
+
+const isAdmin = async (usr) => usr.admin;
+
+const isCorrectPassword = (user, pass) => (user.pass === pass);
+
+const deleteAllUsersWithoutAccess = async () => {
+  const { client, collection } = openCollection();
+  const result = await collection.deleteMany({ access: false });
+  await client.close();
+  return result.deletedCount;
 };
 
-const isAdmin = async (str) => {
-  const user = await getUser(str);
-  return user.admin;
-};
+const deleteUserById = async (id) => {
+  const { client, collection } = openCollection();
 
-const isCorrectPassword = async (str, pass) => {
-  const user = await getUser(str);
-  return (user.pass === pass);
-};
-
-const deleteAllUsersWithoutAccess = () => {
-  // TODO: !!!
-};
-
-const deleteUserWithName = (name) => {
-  // TODO: !!!
-  const { _id } = findByUsername(name);
-  deleteUserById(_id);
+  const result = await collection.deleteOne({ _id: ObjectId(id) });
+  await client.close();
+  return result.deletedCount;
 };
 
 const deleteAllItems = async (pass) => {
@@ -120,7 +116,11 @@ class UserDatabaseInstance {
   }
 
   async insert(userObj) {
-    // TODO: !!! Do a check to make sure that the email, username and access are OK.
+    if (
+      !isValidEmail(userObj.email)
+        && userObj.access
+        && userObj.name.length < 3
+    ) return errors.noDocumentAdded;
     const { client, collection } = await openCollection();
     const { insertedCount, insertedId } = await collection.insertOne(userObj);
     await client.close();
@@ -128,18 +128,22 @@ class UserDatabaseInstance {
   }
 
   async update(filter, changes) {
-    const object = await this.find(filter);
-    // TODO: !!! Do a check to make sure that the email, username and access are OK.
+    const { email, _id, name } = changes;
+    if (
+      (email && !isValidEmail(email))
+      || (_id && !isValidId(_id))
+      || (name && !isValidUsername(name))
+    ) return errors.noDocumentModified;
     const { client, collection } = await openCollection();
-    const { modifiedCount } = await collection.updateOne(object, { $set: { ...changes } });
+    const { modifiedCount } = await collection.updateOne(filter, { $set: { ...changes } });
     await client.close();
     return modifiedCount ? `${modifiedCount} item modified successfully` : errors.noDocumentModified;
   }
 
   async delete(filter, pass) {
-    if (!userExists(filter)) return errors.noDocumentDeleted;
-    if (isValidId(filter && isCorrectPassword(filter, pass))) return deleteUserById(filter);
-    return deleteUserWithName(filter);
+    const user = await this.find(filter);
+    if (user && isCorrectPassword(user.pass, pass)) return deleteUserById(user._id);
+    return errors.noDocumentDeleted;
   }
 }
 
