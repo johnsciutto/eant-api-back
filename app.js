@@ -5,7 +5,7 @@ const { movieAPI, seriesAPI } = require('./routes/api-v1');
 const contactRoute = require('./routes/contacto');
 const mainRoute = require('./routes/main');
 
-const puerto = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 express()
 // * Configuraciones
@@ -19,4 +19,4 @@ express()
   .use('/api/v1/peliculas', movieAPI)
   .use('/api/v1/series', seriesAPI)
 // * Listen
-  .listen(puerto, () => console.log(`Servidor funcionando en el puerto ${puerto}...`));
+  .listen(port, () => console.log(`Back-End listening on port ${port}...`));

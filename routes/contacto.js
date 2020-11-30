@@ -1,6 +1,6 @@
 const express = require('express');
-const { transporter, EMAIL_PERSONAL } = require('../modules/email-transporter');
-const schema = require('../modules/form-validation');
+const { transporter, EMAIL_PERSONAL } = require('../utils/email-transporter');
+const schema = require('../utils/form-validation');
 
 const app = express.Router();
 
