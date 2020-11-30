@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId, ObjectID } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const {
   DB_USER,
@@ -149,7 +149,7 @@ const deleteOneItem = async (filter, collectionName) => {
   const { client, collection } = await openCollection(collectionName);
   let count = 0;
   if (isValidId(filter)) {
-    const result = await collection.deleteOne({ _id: ObjectID(filter) });
+    const result = await collection.deleteOne({ _id: ObjectId(filter) });
     count = result.deletedCount;
   } else {
     const result = await collection.deleteOne({ $text: { $search: filter } });
@@ -206,7 +206,7 @@ const deleteAllItems = async (collectionName) => {
   return result;
 };
 
-class DatabaseInstance {
+class ApiDatabaseInstance {
   constructor(collection) {
     this.collection = collection;
   }
@@ -254,7 +254,7 @@ class DatabaseInstance {
   }
 }
 
-const Movies = new DatabaseInstance(MOVIES_COLLECTION);
-const Series = new DatabaseInstance(SERIES_COLLECTION);
+const Movies = new ApiDatabaseInstance(MOVIES_COLLECTION);
+const Series = new ApiDatabaseInstance(SERIES_COLLECTION);
 
 module.exports = { Movies, Series };
