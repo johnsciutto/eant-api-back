@@ -96,14 +96,6 @@ const deleteUserById = async (id) => {
   return result.deletedCount;
 };
 
-const deleteAllItems = async (pass) => {
-  if (pass !== DELETE_PASSWORD) return errors.noDocumentDeleted;
-  const { client, collection } = await openCollection();
-  const result = await collection.deleteMany({});
-  await client.close();
-  return result;
-};
-
 class UserDatabaseInstance {
   constructor(collection) {
     this.collection = collection;
@@ -145,6 +137,14 @@ class UserDatabaseInstance {
     const user = await this.find(filter);
     if (user && isCorrectPassword(user.pass, pass)) return deleteUserById(user._id);
     return errors.noDocumentDeleted;
+  }
+
+  async deleteAllItems(pass) {
+    if (pass !== DELETE_PASSWORD) return errors.noDocumentDeleted;
+    const { client, collection } = await openCollection();
+    const result = await collection.deleteMany({});
+    await client.close();
+    return result;
   }
 }
 

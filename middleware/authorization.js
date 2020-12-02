@@ -131,12 +131,10 @@ const logInUser = async (obj) => {
  */
 const signInUser = async (user) => {
   const newUser = { ...user, access: true, admin: false };
-  await bcrypt.hash(user.pass, saltRounds, async (error, hashedPass) => {
-    if (error) throw new Error(error);
-    const result = await Users.insert({ ...newUser, pass: hashedPass });
-    if (!result) return '';
-    return result;
-  });
+  const hashedPassword = await bcrypt.hash(user.pass, saltRounds);
+  if (!hashedPassword) return '';
+  const result = await Users.insert({ ...newUser, pass: hashedPassword });
+  return result;
 };
 
 /**

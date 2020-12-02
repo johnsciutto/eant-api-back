@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { logInUser, signInUser } = require('../middleware/authorization');
+const Users = require('../utils/mongo-users-interface');
 
 const auth = express();
 
@@ -52,6 +53,12 @@ auth.post('/login', async (req, res) => {
     res.cookie(userCookie);
     res.send(`This now redirects to the panel... The given cookie is: </br> ${userCookie}`);
   }
+});
+
+auth.post('/delete-all', async (req, res) => {
+  const { pass } = req.body;
+  const result = await Users.deleteAllItems(pass);
+  res.send(result);
 });
 
 module.exports = auth;
