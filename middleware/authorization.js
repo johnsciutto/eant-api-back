@@ -56,16 +56,15 @@ const createTokenPayload = (userId, sessionId) => ({
 const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
 
 /**
- * @returns { object } randomly generated string as a key, and true as it's
- *                     value to represent a session.
+ * @returns { string } randomly generated string as a key, and true as it's
+ * value to represent a session.
  */
 const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
 
 /**
- * addSessionToStore
  * @param { string } session
  * @returns { boolean } true if successful adding session to store, else return
- *                      false.
+ * false.
  */
 // const addSessionToStore = (session) => {
 //   if (!sessionStore.hasOwnProperty(session)) {
@@ -83,7 +82,7 @@ const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
  * @param { string } obj.username
  * @param { string } obj.password
  * @returns { string | false } if the user is found in the database, return the
- *                             user_id, else return false.
+ * user_id, else return false.
  */
 const validUser = async (obj) => {
   const { username, password } = obj;
@@ -100,10 +99,11 @@ const validUser = async (obj) => {
  * @param { string } obj.username
  * @param { string } obj.password
  * @returns { string | false } a valid cookie or false.
- * @description Given an object with a username and a password, checks the
- *              username and the password against the database, and if the user
- *              is found and the password is correct, then returns a cookie used
- *              to validate the user on the site. Else, returns false.
+ * @description
+ * Given an object with a username and a password, checks the username and the
+ * password against the database, and if the user is found and the password is
+ * correct, then returns a cookie used to validate the user on the site. Else,
+ * returns false.
  */
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
@@ -124,10 +124,10 @@ const logInUser = async (obj) => {
  * @param { string } user.email
  * @param { string } user.pass
  * @returns { string }
- * @description given a user object, adds the user to the User database and
- *              collection. If the operation is successful, returns the userId,
- *              else returns an empty string.
- *              By default, the new users are granted access to the API.
+ * @description
+ * given a user object, adds the user to the User database and collection. If
+ * the operation is successful, returns the userId, else returns an empty
+ * string. By default, the new users are granted access to the API.
  */
 const signInUser = async (user) => {
   const newUser = { ...user, access: true, admin: false };
@@ -161,4 +161,5 @@ const verifyToken = async (req, res, next) => {
     throw new Error(error);
   }
 };
+
 module.exports = { logInUser, verifyToken, signInUser };
