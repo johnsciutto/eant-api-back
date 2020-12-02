@@ -117,14 +117,15 @@ class UserDatabaseInstance {
 
   async insert(userObj) {
     if (
-      !isValidEmail(userObj.email)
-        && userObj.access
-        && userObj.name.length < 3
-    ) return errors.noDocumentAdded;
+      !(isValidEmail(userObj.email)
+        || userObj.access
+        || userObj.name.length > 3)
+    ) return null;
+
     const { client, collection } = await openCollection();
     const { insertedCount, insertedId } = await collection.insertOne(userObj);
     await client.close();
-    return insertedCount ? `New document id: ${insertedId}` : errors.noDocumentAdded;
+    return insertedCount ? insertedId : insertedCount;
   }
 
   async update(filter, changes) {
