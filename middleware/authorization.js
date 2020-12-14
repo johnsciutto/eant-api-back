@@ -43,15 +43,9 @@ const createTokenPayload = (userId, sessionId) => ({
 
 /**
  * @param { object } payload - the payload for a signed token
- * @returns { JsonWebToken } signed JSON Web Token.
+ * @returns {string} signed JSON Web Token.
  */
 const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
-
-/**
- * @returns { string } randomly generated string as a key, and true as it's
- * value to represent a session.
- */
-const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
 
 /**
  * @param {object} obj - object containing two properties:
@@ -63,6 +57,7 @@ const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
 const validUser = async (obj) => {
   const { username, password } = obj;
   const user = await Users.find(username);
+  if (!user) return false;
   const result = await bcrypt.compare(password, user.pass);
   if (result) return user._id;
   return false;
@@ -82,15 +77,8 @@ const validUser = async (obj) => {
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
   if (userId) {
-    // TODO: There's a lot of things going on here that are wrong.
-    // !!! At the end of the day, the cookie doesn't look like it's supposed to,
-    // !!! and that is making it really challenging to authenticate users.
-    const sessionId = createSessionId();
-    const payload = createTokenPayload(userId, sessionId);
-    const token = createSignedToken(payload);
-    return createCookie(token, {
-      maxAge: 1000 * 60 * 1,
-    });
+    const token = createSignedToken({ user_id: userId });
+    return token;
   }
   return false;
 };

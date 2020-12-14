@@ -45,10 +45,12 @@ auth.post('/signup', async (req, res) => {
 
 auth.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const userCookie = await logInUser({ username, password });
-  if (userCookie) {
-    res.cookie(userCookie);
-    res.send(`This now redirects to the panel... The given cookie is: </br> ${userCookie}`);
+  const jsonWebToken = await logInUser({ username, password });
+  if (jsonWebToken) {
+    res.cookie('_auth', jsonWebToken, {
+      maxAge: 1000 * 60 * 5,
+    });
+    res.send(`This now redirects to the panel... The given cookie is: </br> ${jsonWebToken}`);
   } else {
     res.send('Login Unsuccessfull');
   }
