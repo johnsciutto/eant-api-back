@@ -123,6 +123,7 @@ const verifyToken = async (req, res, next) => {
 
   try {
     // TODO: Investigate the following line:
+    // !!! This is what I need to test and work on next...
     if (!token) return res.redirect('login');
     jwt.verify(token, JWT_SECRET, (err) => {
       if (err) res.redirect('login');
