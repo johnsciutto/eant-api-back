@@ -1,4 +1,6 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const { verifyToken } = require('../middleware/authorization');
 const { Movies, Series } = require('../utils/mongo-api-interface');
 
 const createAPI = (databaseCollection) => {
@@ -6,6 +8,8 @@ const createAPI = (databaseCollection) => {
 
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.use(verifyToken);
+  app.use(cookieParser());
 
   app.route('/')
     .get(async (req, res) => {

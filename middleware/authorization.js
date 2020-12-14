@@ -6,19 +6,11 @@ const { JWT_SECRET } = process.env;
 
 const saltRounds = 10;
 
-// const sessionStore = {};
-
 /**
- * @param { string } sessionId
- * @returns { boolean } true if sessionId is a valid active session. Else false.
- * @description
- * Produce true if the sessionId is a valid active session.
- */
-// const isValidSession = (sessionId) => sessionStore.hasOwnProperty(sessionId);
-
-/**
- * @param { string } signedToken - a signed token
- * @param { object } config - a configuration object with the following possible
+ * Given a signed token and a configuration object, produce a cookie with a key
+ * of "_auth", a value of the signed token with the given configurations.
+ * @param {string} signedToken - a signed token
+ * @param {object} config - a configuration object with the following possible
  *                            configurations:
  *                                - domain: String
  *                                - encode: Function
@@ -62,43 +54,25 @@ const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
 const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
 
 /**
- * @param { string } session
- * @returns { boolean } true if successful adding session to store, else return
- * false.
- */
-// const addSessionToStore = (session) => {
-//   if (!sessionStore.hasOwnProperty(session)) {
-//     // TODO: Add a proper property and expiration date. Maybe separate the
-//     // TODO: creating of the session object itself into a different function.
-//     sessionStore[session] = { exp: 'This represents the expiration date...' };
-//   } else {
-//     addSessionToStore(createSessionId());
-//   }
-//   return session;
-// };
-
-/**
- * @param { object } obj - object containing two properties:
- * @param { string } obj.username
- * @param { string } obj.password
- * @returns { string | false } if the user is found in the database, return the
+ * @param {object} obj - object containing two properties:
+ * @property {string} obj.username
+ * @property {string} obj.password
+ * @returns {string|false} if the user is found in the database, return the
  * user_id, else return false.
  */
 const validUser = async (obj) => {
   const { username, password } = obj;
   const user = await Users.find(username);
-  bcrypt.compare(password, user.pass, (err, result) => {
-    if (err) throw new Error(err);
-    if (!result) return false;
-    if (result) return user._id;
-  });
+  const result = await bcrypt.compare(password, user.pass);
+  if (result) return user._id;
+  return false;
 };
 
 /**
- * @param { object } obj
- * @param { string } obj.username
- * @param { string } obj.password
- * @returns { string | false } a valid cookie or false.
+ * @param {object} obj
+ * @property {string} obj.username
+ * @property {string} obj.password
+ * @returns {string|boolean} a valid cookie or false.
  * @description
  * Given an object with a username and a password, checks the username and the
  * password against the database, and if the user is found and the password is
@@ -108,6 +82,9 @@ const validUser = async (obj) => {
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
   if (userId) {
+    // TODO: There's a lot of things going on here that are wrong.
+    // !!! At the end of the day, the cookie doesn't look like it's supposed to,
+    // !!! and that is making it really challenging to authenticate users.
     const sessionId = createSessionId();
     const payload = createTokenPayload(userId, sessionId);
     const token = createSignedToken(payload);
@@ -119,20 +96,26 @@ const logInUser = async (obj) => {
 };
 
 /**
- * @param { object } user
- * @param { string } user.name
- * @param { string } user.email
- * @param { string } user.pass
- * @returns { string }
- * @description
- * given a user object, adds the user to the User database and collection. If
- * the operation is successful, returns the userId, else returns an empty
- * string. By default, the new users are granted access to the API.
+ * A user.
+ * @typedef {object} User
+ * @property {string} name - The user's username
+ * @property {string} email - The user's email
+ * @property {string} pass - The user's password
+ */
+
+/**
+ * Given a user object, adds the user to the User database and collection. If
+ * the operation is successful, returns the userId, else returns null.
+ * By default, the new users are granted access to the API.
+ * @param {User} user - A user
+ * @returns {Promise<string|null>}
  */
 const signInUser = async (user) => {
+  const foundUser = await Users.find(user.name || user.email);
+  if (foundUser) return null;
   const newUser = { ...user, access: true, admin: false };
   const hashedPassword = await bcrypt.hash(user.pass, saltRounds);
-  if (!hashedPassword) return '';
+  if (!hashedPassword) return null;
   const result = await Users.insert({ ...newUser, pass: hashedPassword });
   return result;
 };
@@ -148,11 +131,13 @@ const signInUser = async (user) => {
  */
 const verifyToken = async (req, res, next) => {
   const token = req.cookies._auth;
+  const { cookies } = req;
+
   try {
     // TODO: Investigate the following line:
-    if (!token) /* return (is this necessary?) */ res.redirect('./login');
+    if (!token) return res.redirect('login');
     jwt.verify(token, JWT_SECRET, (err) => {
-      if (err) res.redirect('./login');
+      if (err) res.redirect('login');
       else next();
     });
   } catch (error) {

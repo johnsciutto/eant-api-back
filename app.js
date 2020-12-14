@@ -1,5 +1,6 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 const authRoute = require('./routes/auth');
 const { movieAPI, seriesAPI } = require('./routes/api-v1');
 const contactRoute = require('./routes/contact');
@@ -12,6 +13,7 @@ express()
   .use(express.static('public'))
   .use(express.urlencoded({ extended: true }))
   .use(fileUpload())
+  .use(cookieParser())
 // * Routes
   .use('/', mainRoute)
   .use('/contact', contactRoute)

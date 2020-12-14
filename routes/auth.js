@@ -12,9 +12,11 @@ auth.use(cookieParser());
 auth.post('/signup', async (req, res) => {
   try {
     let response;
+
     const {
       name, email, pass, confirmPass,
     } = req.body;
+
     if (pass !== confirmPass) {
       response = {
         ok: false,
@@ -22,10 +24,6 @@ auth.post('/signup', async (req, res) => {
       };
     }
     const successfullNewUserId = await signInUser({ name, email, pass });
-
-    // TODO: For some reason the following is not waiting for the above function
-    // TODO:  to finish executing, and so 'successfullNewUserId' is always
-    // TODO:  'undefined'. I asked the question in the freeCodeCamp forum.
 
     if (!successfullNewUserId) {
       response = {
@@ -48,11 +46,16 @@ auth.post('/signup', async (req, res) => {
 auth.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const userCookie = await logInUser({ username, password });
-  if (!userCookie) res.redirect('./login');
   if (userCookie) {
     res.cookie(userCookie);
     res.send(`This now redirects to the panel... The given cookie is: </br> ${userCookie}`);
+  } else {
+    res.send('Login Unsuccessfull');
   }
+});
+
+auth.post('/logout', async (req, res) => {
+
 });
 
 auth.post('/delete-all', async (req, res) => {

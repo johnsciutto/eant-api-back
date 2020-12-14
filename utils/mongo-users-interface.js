@@ -51,17 +51,29 @@ const findById = async (id) => {
 };
 
 const findByEmail = async (email) => {
-  const { client, collection } = await openCollection();
-  const result = await collection.find({ $search: { $text: email } });
-  await client.close();
-  return result || errors.emptyDatabase;
+  try {
+    const { client, collection } = await openCollection();
+    const cursor = await collection.find({ $text: { $search: email } });
+    const [result] = await cursor.toArray();
+    await cursor.close();
+    await client.close();
+    return result || errors.emptyDatabase;
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 const findByUsername = async (name) => {
-  const { client, collection } = await openCollection();
-  const result = await collection.find({ $search: { $text: name } });
-  await client.close();
-  return result || errors.emptyDatabase;
+  try {
+    const { client, collection } = await openCollection();
+    const cursor = await collection.find({ $text: { $search: name } });
+    const [result] = await cursor.toArray();
+    await cursor.close();
+    await client.close();
+    return result || null;
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 const userExists = async (id) => (await findById(id) !== errors.noFoundDocument);
