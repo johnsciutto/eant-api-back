@@ -7,41 +7,6 @@ const { JWT_SECRET } = process.env;
 const saltRounds = 10;
 
 /**
- * Given a signed token and a configuration object, produce a cookie with a key
- * of "_auth", a value of the signed token with the given configurations.
- * @param {string} signedToken - a signed token
- * @param {object} config - a configuration object with the following possible
- *                            configurations:
- *                                - domain: String
- *                                - encode: Function
- *                                - expires: Date
- *                                - httpOnly: Boolean
- *                                - maxAge: Number
- *                                - path: String
- *                                - secure: Boolean
- *                                - signed: Boolean
- *                                - sameSite: Boolean or String
- *                            To find out more about the configurations, visit:
- *                            https://expressjs.com/en/5x/api.html#res.cookie
- * @returns { array }
- *    The returned array includes:
- *    - 0: "_auth",
- *    - 1: <signedToken>:string,
- *    - 2: Config object.
- */
-const createCookie = (signedToken, config) => ['_auth', signedToken, config];
-
-/**
- * @param { string } userId
- * @param { string } sessionId
- * @returns { object } - payload of a token
- */
-const createTokenPayload = (userId, sessionId) => ({
-  user_id: userId,
-  SID: sessionId,
-});
-
-/**
  * @param { object } payload - the payload for a signed token
  * @returns {string} signed JSON Web Token.
  */
