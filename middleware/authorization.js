@@ -4,10 +4,14 @@ const Users = require('../utils/mongo-users-interface');
 
 const { JWT_SECRET } = process.env;
 
+/**
+ * The number of salting rounds that bcrypt performs.
+ * @type {number}
+ */
 const saltRounds = 10;
 
 /**
- * @param { object } payload - the payload for a signed token
+ * @param {Object} payload - the payload for a signed token
  * @returns {string} signed JSON Web Token.
  */
 const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
@@ -15,9 +19,9 @@ const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
 /**
  * Given a user object with username and password, produce either the user_id
  * of the user or false;
- * @param {object} obj - object containing two properties:
- * @property {string} obj.username
- * @property {string} obj.password
+ * @param {Object} obj - object containing two properties:
+ * @property {string} username
+ * @property {string} password
  * @returns {Promise<string|false>} if the user is found in the database, return the
  * user_id, else return false.
  */
@@ -35,11 +39,10 @@ const validUser = async (obj) => {
  * password against the database, and if the user is found and the password is
  * correct, then returns a cookie used to validate the user on the site. Else,
  * returns false.
- * @param {object} obj
- * @property {string} obj.username
- * @property {string} obj.password
+ * @param {Object} obj
+ * @property {string} username
+ * @property {string} password
  * @returns {Promise<string|boolean>} a valid cookie or false.
- * @description
  */
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
@@ -52,7 +55,7 @@ const logInUser = async (obj) => {
 
 /**
  * A user.
- * @typedef {object} User
+ * @typedef {Object} User
  * @property {string} name - The user's username
  * @property {string} email - The user's email
  * @property {string} pass - The user's password
@@ -79,9 +82,10 @@ const signInUser = async (user) => {
  * Perform a verification on the token recieved in the request object, and only
  * continue towards the route if the verification is successfull. Else redirect
  * the user to the appropiate endpoints.
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @param {Function} next - A function that executes after the middleware is successfull.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - A function that executes after the middleware is
+ * successfull.
  */
 const verifyToken = async (req, res, next) => {
   try {
@@ -97,5 +101,5 @@ const verifyToken = async (req, res, next) => {
 };
 
 module.exports = {
-  logInUser, verifyToken, invalidateCookieAndToken, signInUser,
+  logInUser, verifyToken, signInUser,
 };
