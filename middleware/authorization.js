@@ -13,10 +13,12 @@ const saltRounds = 10;
 const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
 
 /**
+ * Given a user object with username and password, produce either the user_id
+ * of the user or false;
  * @param {object} obj - object containing two properties:
  * @property {string} obj.username
  * @property {string} obj.password
- * @returns {string|false} if the user is found in the database, return the
+ * @returns {Promise<string|false>} if the user is found in the database, return the
  * user_id, else return false.
  */
 const validUser = async (obj) => {
@@ -29,15 +31,15 @@ const validUser = async (obj) => {
 };
 
 /**
- * @param {object} obj
- * @property {string} obj.username
- * @property {string} obj.password
- * @returns {string|boolean} a valid cookie or false.
- * @description
  * Given an object with a username and a password, checks the username and the
  * password against the database, and if the user is found and the password is
  * correct, then returns a cookie used to validate the user on the site. Else,
  * returns false.
+ * @param {object} obj
+ * @property {string} obj.username
+ * @property {string} obj.password
+ * @returns {Promise<string|boolean>} a valid cookie or false.
+ * @description
  */
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
@@ -74,21 +76,16 @@ const signInUser = async (user) => {
 };
 
 /**
- * @param { object } req - The request object.
- * @param { object } res - The response object.
- * @param { function } next - A function that executes after the middleware is successfull.
- * @description
  * Perform a verification on the token recieved in the request object, and only
  * continue towards the route if the verification is successfull. Else redirect
  * the user to the appropiate endpoints.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @param {Function} next - A function that executes after the middleware is successfull.
  */
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies._auth;
-  const { cookies } = req;
-
   try {
-    // TODO: Investigate the following line:
-    // !!! This is what I need to test and work on next...
+    const token = req.cookies._auth;
     if (!token) return res.redirect('login');
     jwt.verify(token, JWT_SECRET, (err) => {
       if (err) res.redirect('login');
@@ -98,5 +95,10 @@ const verifyToken = async (req, res, next) => {
     throw new Error(error);
   }
 };
+
+/**
+ * Given a cookie, invalidate the cookie and it's token payload.
+ * @param
+ */
 
 module.exports = { logInUser, verifyToken, signInUser };
