@@ -96,9 +96,6 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-/**
- * Given a cookie, invalidate the cookie and it's token payload.
- * @param
- */
-
-module.exports = { logInUser, verifyToken, signInUser };
+module.exports = {
+  logInUser, verifyToken, invalidateCookieAndToken, signInUser,
+};

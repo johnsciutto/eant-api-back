@@ -1,6 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const { logInUser, signInUser } = require('../middleware/authorization');
+const { logInUser, signInUser, invalidateCookieAndToken } = require('../middleware/authorization');
 const Users = require('../utils/mongo-users-interface');
 
 const auth = express();
@@ -57,7 +57,8 @@ auth.post('/login', async (req, res) => {
 });
 
 auth.post('/logout', async (req, res) => {
-
+  res.clearCookie('_auth');
+  res.send('User logged out...');
 });
 
 auth.post('/delete-all', async (req, res) => {
