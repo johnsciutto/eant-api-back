@@ -1,7 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { logInUser, signInUser } = require('../middleware/authorization');
-const Users = require('../utils/mongo-users-interface');
 
 const auth = express();
 
@@ -45,23 +44,20 @@ auth.post('/signup', async (req, res) => {
 
 auth.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const userCookie = await logInUser({ username, password });
-  if (userCookie) {
-    res.cookie(userCookie);
-    res.send(`This now redirects to the panel... The given cookie is: </br> ${userCookie}`);
+  const jsonWebToken = await logInUser({ username, password });
+  if (jsonWebToken) {
+    res.cookie('_auth', jsonWebToken, {
+      expires: new Date(2022, 0, 1),
+    });
+    res.send(`This now redirects to the panel... The given cookie is: </br> ${jsonWebToken}`);
   } else {
     res.send('Login Unsuccessfull');
   }
 });
 
 auth.post('/logout', async (req, res) => {
-
-});
-
-auth.post('/delete-all', async (req, res) => {
-  const { pass } = req.body;
-  const result = await Users.deleteAllItems(pass);
-  res.send(result);
+  res.clearCookie('_auth');
+  res.send('User logged out...');
 });
 
 module.exports = auth;

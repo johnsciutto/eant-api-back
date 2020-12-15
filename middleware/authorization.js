@@ -4,100 +4,58 @@ const Users = require('../utils/mongo-users-interface');
 
 const { JWT_SECRET } = process.env;
 
+/**
+ * The number of salting rounds that bcrypt performs.
+ * @type {number}
+ */
 const saltRounds = 10;
 
 /**
- * Given a signed token and a configuration object, produce a cookie with a key
- * of "_auth", a value of the signed token with the given configurations.
- * @param {string} signedToken - a signed token
- * @param {object} config - a configuration object with the following possible
- *                            configurations:
- *                                - domain: String
- *                                - encode: Function
- *                                - expires: Date
- *                                - httpOnly: Boolean
- *                                - maxAge: Number
- *                                - path: String
- *                                - secure: Boolean
- *                                - signed: Boolean
- *                                - sameSite: Boolean or String
- *                            To find out more about the configurations, visit:
- *                            https://expressjs.com/en/5x/api.html#res.cookie
- * @returns { array }
- *    The returned array includes:
- *    - 0: "_auth",
- *    - 1: <signedToken>:string,
- *    - 2: Config object.
- */
-const createCookie = (signedToken, config) => ['_auth', signedToken, config];
-
-/**
- * @param { string } userId
- * @param { string } sessionId
- * @returns { object } - payload of a token
- */
-const createTokenPayload = (userId, sessionId) => ({
-  user_id: userId,
-  SID: sessionId,
-});
-
-/**
- * @param { object } payload - the payload for a signed token
- * @returns { JsonWebToken } signed JSON Web Token.
+ * @param {Object} payload - the payload for a signed token
+ * @returns {string} signed JSON Web Token.
  */
 const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
 
 /**
- * @returns { string } randomly generated string as a key, and true as it's
- * value to represent a session.
- */
-const createSessionId = () => `S${Math.random().toString(36).slice(2)}`;
-
-/**
- * @param {object} obj - object containing two properties:
- * @property {string} obj.username
- * @property {string} obj.password
- * @returns {string|false} if the user is found in the database, return the
+ * Given a user object with username and password, produce either the user_id
+ * of the user or false;
+ * @param {Object} obj - object containing two properties:
+ * @property {string} username
+ * @property {string} password
+ * @returns {Promise<string|false>} if the user is found in the database, return the
  * user_id, else return false.
  */
 const validUser = async (obj) => {
   const { username, password } = obj;
   const user = await Users.find(username);
+  if (!user) return false;
   const result = await bcrypt.compare(password, user.pass);
   if (result) return user._id;
   return false;
 };
 
 /**
- * @param {object} obj
- * @property {string} obj.username
- * @property {string} obj.password
- * @returns {string|boolean} a valid cookie or false.
- * @description
  * Given an object with a username and a password, checks the username and the
  * password against the database, and if the user is found and the password is
  * correct, then returns a cookie used to validate the user on the site. Else,
  * returns false.
+ * @param {Object} obj
+ * @property {string} username
+ * @property {string} password
+ * @returns {Promise<string|boolean>} a valid cookie or false.
  */
 const logInUser = async (obj) => {
   const userId = await validUser(obj);
   if (userId) {
-    // TODO: There's a lot of things going on here that are wrong.
-    // !!! At the end of the day, the cookie doesn't look like it's supposed to,
-    // !!! and that is making it really challenging to authenticate users.
-    const sessionId = createSessionId();
-    const payload = createTokenPayload(userId, sessionId);
-    const token = createSignedToken(payload);
-    return createCookie(token, {
-      maxAge: 1000 * 60 * 1,
-    });
+    const token = createSignedToken({ user_id: userId });
+    return token;
   }
   return false;
 };
 
 /**
  * A user.
- * @typedef {object} User
+ * @typedef {Object} User
  * @property {string} name - The user's username
  * @property {string} email - The user's email
  * @property {string} pass - The user's password
@@ -121,20 +79,17 @@ const signInUser = async (user) => {
 };
 
 /**
- * @param { object } req - The request object.
- * @param { object } res - The response object.
- * @param { function } next - A function that executes after the middleware is successfull.
- * @description
  * Perform a verification on the token recieved in the request object, and only
  * continue towards the route if the verification is successfull. Else redirect
  * the user to the appropiate endpoints.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - A function that executes after the middleware is
+ * successfull.
  */
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies._auth;
-  const { cookies } = req;
-
   try {
-    // TODO: Investigate the following line:
+    const token = req.cookies._auth;
     if (!token) return res.redirect('login');
     jwt.verify(token, JWT_SECRET, (err) => {
       if (err) res.redirect('login');
@@ -145,4 +100,6 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-module.exports = { logInUser, verifyToken, signInUser };
+module.exports = {
+  logInUser, verifyToken, signInUser,
+};
