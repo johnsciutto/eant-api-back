@@ -9,16 +9,16 @@ const mainRoute = require('./routes/main');
 const port = process.env.PORT || 3000;
 
 express()
-// * Configurations
+  // * Configurations
   .use(express.static('public'))
   .use(express.urlencoded({ extended: true }))
   .use(fileUpload())
   .use(cookieParser())
-// * Routes
+  // * Routes
   .use('/', mainRoute)
   .use('/contact', contactRoute)
   .use('/api/v1/auth', authRoute)
   .use('/api/v1/movies', movieAPI)
   .use('/api/v1/series', seriesAPI)
-// * Listen
+  // * Listen
   .listen(port, () => console.log(`Back-End listening on port ${port}...`));

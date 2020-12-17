@@ -2,3 +2,4 @@ node_modules
 .eslintc.json
 .env
 /public/uploads
+.vercel

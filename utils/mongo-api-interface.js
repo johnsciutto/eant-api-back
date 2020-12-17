@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const {MongoClient, ObjectId} = require('mongodb');
 
 const {
   DB_USER,
@@ -12,11 +12,11 @@ const {
 
 const openCollection = async (collectionName) => {
   const DB_URL = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}?retryWrites=true&w=majority`;
-  const client = new MongoClient(DB_URL, { useUnifiedTopology: true });
+  const client = new MongoClient(DB_URL, {useUnifiedTopology: true});
   await client.connect();
   const database = client.db(DB_NAME);
   const collection = database.collection(collectionName);
-  return { client, collection };
+  return {client, collection};
 };
 
 const errors = {
@@ -70,14 +70,14 @@ const sanitizeItem = (item, collectionName) => {
 };
 
 const findById = async (id, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
-  const result = await collection.findOne({ _id: ObjectId(id) });
+  const {client, collection} = await openCollection(collectionName);
+  const result = await collection.findOne({_id: ObjectId(id)});
   await client.close();
-  return result ?? errors.noFoundDocument;
+  return result || errors.noFoundDocument;
 };
 
 const findAllItems = async (collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   const cursor = await collection.find();
   const result = await cursor.toArray();
   cursor.close();
@@ -86,9 +86,9 @@ const findAllItems = async (collectionName) => {
 };
 
 const findByRating = async (itemStr, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   const item = parseInt(itemStr, 10);
-  const cursor = await collection.find({ rating: { $eq: item } });
+  const cursor = await collection.find({rating: {$eq: item}});
   const result = await cursor.toArray();
   cursor.close();
   await client.close();
@@ -107,9 +107,9 @@ const splitRangeIntoObject = (item) => {
 };
 
 const findByRange = async (item, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
-  const { lowerRange, higherRange } = splitRangeIntoObject(item);
-  const cursor = await collection.find({ rating: { $gte: lowerRange, $lte: higherRange } });
+  const {client, collection} = await openCollection(collectionName);
+  const {lowerRange, higherRange} = splitRangeIntoObject(item);
+  const cursor = await collection.find({rating: {$gte: lowerRange, $lte: higherRange}});
   const result = await cursor.toArray();
   cursor.close();
   await client.close();
@@ -117,8 +117,8 @@ const findByRange = async (item, collectionName) => {
 };
 
 const findByString = async (item, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
-  const cursor = await collection.find({ $text: { $search: item } });
+  const {client, collection} = await openCollection(collectionName);
+  const cursor = await collection.find({$text: {$search: item}});
   const result = await cursor.toArray();
   cursor.close();
   await client.close();
@@ -126,9 +126,9 @@ const findByString = async (item, collectionName) => {
 };
 
 const findByYear = async (itemStr, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   const item = parseInt(itemStr, 10);
-  const cursor = await collection.find({ year: { $eq: item } });
+  const cursor = await collection.find({year: {$eq: item}});
   const result = await cursor.toArray();
   cursor.close();
   await client.close();
@@ -146,13 +146,13 @@ const countMovies = async (collectionName) => {
 };
 
 const deleteOneItem = async (filter, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   let count = 0;
   if (isValidId(filter)) {
-    const result = await collection.deleteOne({ _id: ObjectId(filter) });
+    const result = await collection.deleteOne({_id: ObjectId(filter)});
     count = result.deletedCount;
   } else {
-    const result = await collection.deleteOne({ $text: { $search: filter } });
+    const result = await collection.deleteOne({$text: {$search: filter}});
     count = result.deletedCount;
   }
   client.close();
@@ -160,14 +160,14 @@ const deleteOneItem = async (filter, collectionName) => {
 };
 
 const deleteItemsGivenYear = async (filter, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   let count = 0;
   if (collectionName === MOVIES_COLLECTION) {
-    const result = await collection.deleteMany({ year: filter });
+    const result = await collection.deleteMany({year: filter});
     count = result.deletedCount;
   } if (collectionName === SERIES_COLLECTION) {
-    const resultA = await collection.deleteMany({ startYear: filter });
-    const resultB = await collection.deleteMany({ endYear: filter });
+    const resultA = await collection.deleteMany({startYear: filter});
+    const resultB = await collection.deleteMany({endYear: filter});
     count = resultA.deletedCount + resultB.deletedCount;
   }
   await client.close();
@@ -175,15 +175,15 @@ const deleteItemsGivenYear = async (filter, collectionName) => {
 };
 
 const deleteItemsGivenRating = async (filter, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
-  const result = await collection.deleteMany({ rating: filter });
+  const {client, collection} = await openCollection(collectionName);
+  const result = await collection.deleteMany({rating: filter});
   await client.close();
   return result.deletedCount;
 };
 
 const deleteItemsGivenString = async (filter, collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
-  const result = await collection.deleteMany({ $text: { $search: filter } });
+  const {client, collection} = await openCollection(collectionName);
+  const result = await collection.deleteMany({$text: {$search: filter}});
   const count = result.deletedCount;
   await client.close();
   return count;
@@ -200,7 +200,7 @@ const deleteManyItems = async (filter, collectionName) => {
 };
 
 const deleteAllItems = async (collectionName) => {
-  const { client, collection } = await openCollection(collectionName);
+  const {client, collection} = await openCollection(collectionName);
   const result = await collection.deleteMany({});
   await client.close();
   return result;
@@ -223,8 +223,8 @@ class ApiDatabaseInstance {
 
   async insert(movieObj) {
     const parsedObj = sanitizeItem(movieObj, this.collection);
-    const { client, collection } = await openCollection(this.collection);
-    const { insertedCount, insertedId } = await collection.insertOne(parsedObj, this.collection);
+    const {client, collection} = await openCollection(this.collection);
+    const {insertedCount, insertedId} = await collection.insertOne(parsedObj, this.collection);
     await client.close();
     return insertedCount ? `New document id: ${insertedId}` : errors.noDocumentAdded;
   }
@@ -232,8 +232,8 @@ class ApiDatabaseInstance {
   async update(filter, changes) {
     const object = await this.find(filter, this.collection);
     const changesObj = sanitizeItem(changes, this.collection);
-    const { client, collection } = await openCollection(this.collection);
-    const { modifiedCount } = await collection.updateOne(object, { $set: { ...changesObj } });
+    const {client, collection} = await openCollection(this.collection);
+    const {modifiedCount} = await collection.updateOne(object, {$set: {...changesObj}});
     await client.close();
     return modifiedCount ? `${modifiedCount} item modified successfully` : errors.noDocumentModified;
   }
@@ -257,4 +257,4 @@ class ApiDatabaseInstance {
 const Movies = new ApiDatabaseInstance(MOVIES_COLLECTION);
 const Series = new ApiDatabaseInstance(SERIES_COLLECTION);
 
-module.exports = { Movies, Series };
+module.exports = {Movies, Series};
