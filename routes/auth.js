@@ -49,9 +49,9 @@ auth.post('/login', async (req, res) => {
     res.cookie('_auth', jsonWebToken, {
       expires: new Date(2022, 0, 1),
     });
-    res.send(`This now redirects to the panel... The given cookie is: </br> ${jsonWebToken}`);
+    res.send(jsonWebToken);
   } else {
-    res.send('Login Unsuccessfull');
+    res.send(null);
   }
 });
 
