@@ -90,9 +90,9 @@ const signInUser = async (user) => {
 const verifyToken = async (req, res, next) => {
   try {
     const token = req.cookies._auth;
-    if (!token) return res.redirect('login');
+    if (!token) return res.redirect('/auth/login'); // TODO: Edit this to redirect to the front-end login page.
     jwt.verify(token, JWT_SECRET, (err) => {
-      if (err) res.redirect('login');
+      if (err) res.redirect('/auth/login'); // TODO: Edit this to redirect to the front-end login page.
       else next();
     });
   } catch (error) {
