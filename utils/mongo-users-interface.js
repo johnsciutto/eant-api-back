@@ -40,7 +40,7 @@ const isValidEmail = (str) => {
   return regEx.test(String(str).toLowerCase());
 };
 
-const isValidUsername = (str) => (!isValidEmail(str) && !isValidId(str) && str.length >= 3);
+const isValidUsername = (str) => (str && !isValidEmail(str) && !isValidId(str) && str.length >= 3);
 
 // * findBy...
 
@@ -84,7 +84,7 @@ const getUser = async (str) => {
   let user;
   if (isValidId(str)) user = await findById(str);
   if (isValidEmail(str)) user = await findByEmail(str);
-  if (isValidUsername(str)) user = await isValidUsername(str);
+  if (isValidUsername(str)) user = await findByUsername(str);
   return user;
 };
 
@@ -117,7 +117,8 @@ class UserDatabaseInstance {
   async find(str) {
     if (isValidId(str)) return findById(str);
     if (isValidEmail(str)) return findByEmail(str);
-    return findByUsername(str);
+    if (isValidUsername(str)) return findByUsername(str);
+    return null;
   }
 
   async insert(userObj) {
