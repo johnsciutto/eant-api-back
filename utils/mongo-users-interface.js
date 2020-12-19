@@ -77,29 +77,7 @@ const findByUsername = async (name) => {
   }
 };
 
-const userExists = async (id) => (await findById(id) !== errors.noFoundDocument);
-
-const getUser = async (str) => {
-  if (!userExists(str)) return errors.noFoundDocument;
-  let user;
-  if (isValidId(str)) user = await findById(str);
-  if (isValidEmail(str)) user = await findByEmail(str);
-  if (isValidUsername(str)) user = await findByUsername(str);
-  return user;
-};
-
-const hasAccess = async (usr) => usr.access;
-
-const isAdmin = async (usr) => usr.admin;
-
 const isCorrectPassword = (user, pass) => (user.pass === pass);
-
-const deleteAllUsersWithoutAccess = async () => {
-  const { client, collection } = openCollection();
-  const result = await collection.deleteMany({ access: false });
-  await client.close();
-  return result.deletedCount;
-};
 
 const deleteUserById = async (id) => {
   const { client, collection } = openCollection();
