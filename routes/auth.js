@@ -13,20 +13,16 @@ auth.post('/signup', async (req, res) => {
     let response;
 
     const {
-      name: username, email, pass: password, confirmPass,
+      name, email, pass, confirmPass,
     } = req.body;
 
-    if (password !== confirmPass) {
+    if (pass !== confirmPass) {
       response = {
         ok: false,
         message: 'The passwords do not match',
       };
     }
-    const successfullNewUserId = await signInUser({
-      name: username,
-      email,
-      pass: password,
-    });
+    const successfullNewUserId = await signInUser({ name, email, pass });
 
     if (!successfullNewUserId) {
       response = {
