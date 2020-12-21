@@ -5,7 +5,6 @@ const authRoute = require('./routes/auth');
 const { movieAPI, seriesAPI } = require('./routes/api-v1');
 const contactRoute = require('./routes/contact');
 const mainRoute = require('./routes/main');
-const testRoute = require('./routes/test');
 
 const port = process.env.PORT || 3000;
 
@@ -18,7 +17,6 @@ express()
   // * Routes
   .use('/', mainRoute)
   .use('/contact', contactRoute)
-  .use('/test', testRoute)
   .use('/api/v1/auth', authRoute)
   .use('/api/v1/movies', movieAPI)
   .use('/api/v1/series', seriesAPI)
