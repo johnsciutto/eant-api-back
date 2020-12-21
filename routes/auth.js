@@ -57,7 +57,7 @@ auth.post('/login', async (req, res) => {
 
 auth.post('/logout', async (req, res) => {
   res.clearCookie('_auth');
-  res.send('User logged out...');
+  res.send(true);
 });
 
 module.exports = auth;
