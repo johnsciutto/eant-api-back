@@ -34,10 +34,11 @@ auth.post('/signup', async (req, res) => {
         message: 'Operation failed, no user was added to the database',
       };
     } else {
+      const jwt = await logInUser({ username: name, password: pass });
       response = {
         ok: true,
         message: 'User created successfully',
-        user_id: successfullNewUserId,
+        validToken: jwt,
       };
     }
     res.send(response);
