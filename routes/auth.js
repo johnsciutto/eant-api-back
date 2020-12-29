@@ -1,10 +1,10 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const {logInUser, signInUser} = require('../middleware/authorization');
+const { logInUser, signUpUser } = require('../middleware/authorization');
 
 const auth = express();
 
-auth.use(express.urlencoded({extended: true}));
+auth.use(express.urlencoded({ extended: true }));
 auth.use(express.json());
 auth.use(cookieParser());
 
@@ -22,7 +22,7 @@ auth.post('/signup', async (req, res) => {
         message: 'The passwords do not match',
       };
     }
-    const successfullNewUserId = await signInUser({
+    const successfullNewUserId = await signUpUser({
       name,
       email,
       pass,
@@ -34,11 +34,11 @@ auth.post('/signup', async (req, res) => {
         message: 'Operation failed, no user was added to the database',
       };
     } else {
-      const jwt = await logInUser({username: name, password: pass});
+      const logInResponse = await logInUser({ username: name, password: pass });
       response = {
         ok: true,
         message: 'User created successfully',
-        validToken: jwt,
+        validToken: logInResponse.token,
       };
     }
     res.send(response);
@@ -48,17 +48,18 @@ auth.post('/signup', async (req, res) => {
 });
 
 auth.post('/login', async (req, res) => {
-  const {username, password} = req.body;
-  const jsonWebToken = await logInUser({username, password});
-  if (jsonWebToken) {
-    res.cookie('_auth', jsonWebToken, {
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    });
-    res.send(jsonWebToken);
-  } else {
-    res.send(null);
+  const { username, password } = req.body;
+  const response = await logInUser({ username, password });
+
+  if (!response.ok) {
+    return res.send(response);
   }
+
+  res.cookie('_auth', response.token, {
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
+  res.send(response);
 });
 
 auth.post('/logout', async (req, res) => {

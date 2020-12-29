@@ -51,23 +51,10 @@ const findById = async (id) => {
   return result || errors.emptyDatabase;
 };
 
-const findByEmail = async (email) => {
-  try {
-    const { client, collection } = await openCollection();
-    const cursor = await collection.find({ $text: { $search: email } });
-    const [result] = await cursor.toArray();
-    await cursor.close();
-    await client.close();
-    return result || errors.emptyDatabase;
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
 const findByUsername = async (name) => {
   try {
     const { client, collection } = await openCollection();
-    const cursor = await collection.find({ $text: { $search: name } });
+    const cursor = await collection.find({ name });
     const [result] = await cursor.toArray();
     await cursor.close();
     await client.close();
@@ -94,7 +81,6 @@ class UserDatabaseInstance {
 
   async find(str) {
     if (isValidId(str)) return findById(str);
-    if (isValidEmail(str)) return findByEmail(str);
     if (isValidUsername(str)) return findByUsername(str);
     return null;
   }

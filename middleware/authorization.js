@@ -51,11 +51,18 @@ const validUser = async (obj) => {
  */
 const logInUser = async (obj) => {
   const { userId, admin } = await validUser(obj);
+
   if (userId) {
-    const token = createSignedToken({ user_id: userId, admin });
-    return token;
+    const token = await createSignedToken({ user_id: userId, admin });
+    return {
+      ok: true,
+      token,
+    };
   }
-  return false;
+  return {
+    ok: false,
+    message: 'User not found.',
+  };
 };
 
 /**
@@ -73,8 +80,9 @@ const logInUser = async (obj) => {
  * @param {User} user - A user
  * @returns {Promise<string|null>}
  */
-const signInUser = async (user) => {
-  const foundUser = await Users.find(user.name || user.email);
+const signUpUser = async (user) => {
+  const foundUser = await Users.find(user.name);
+
   if (foundUser) {
     return {
       ok: false,
@@ -91,12 +99,6 @@ const signInUser = async (user) => {
   }
   const result = await Users.insert({ ...newUser, pass: hashedPassword });
 
-  // TODO: DELETE FROM HERE ||||||||||||||||||||||||||||||
-  console.log('--------------------------------');
-  console.log({ result });
-  console.log('--------------------------------');
-  // TODO: DELETE TO HERE ||||||||||||||||||||||||||||||||
-
   return result;
 };
 
@@ -112,9 +114,10 @@ const signInUser = async (user) => {
 const verifyToken = async (req, res, next) => {
   try {
     const token = req.cookies._auth;
-    if (!token) return res.redirect('/auth/login'); // TODO: Edit this to redirect to the front-end login page.
+
+    if (!token) return res.redirect('/auth/login');
     jwt.verify(token, JWT_SECRET, (err) => {
-      if (err) res.redirect('/auth/login'); // TODO: Edit this to redirect to the front-end login page.
+      if (err) res.redirect('/auth/login');
       else next();
     });
   } catch (error) {
@@ -123,5 +126,5 @@ const verifyToken = async (req, res, next) => {
 };
 
 module.exports = {
-  logInUser, verifyToken, signInUser,
+  logInUser, verifyToken, signUpUser,
 };
