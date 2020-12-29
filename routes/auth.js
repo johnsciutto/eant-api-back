@@ -52,7 +52,8 @@ auth.post('/login', async (req, res) => {
   const jsonWebToken = await logInUser({ username, password });
   if (jsonWebToken) {
     res.cookie('_auth', jsonWebToken, {
-      expires: new Date(2022, 0, 1),
+      secure: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365,
     });
     res.send(jsonWebToken);
   } else {
