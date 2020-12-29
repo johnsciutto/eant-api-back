@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Users = require('../utils/mongo-users-interface');
 
-const {JWT_SECRET} = process.env;
+const { JWT_SECRET } = process.env;
 
 /**
  * The number of salting rounds that bcrypt performs.
@@ -26,14 +26,16 @@ const createSignedToken = (payload) => jwt.sign(payload, JWT_SECRET);
  * user_id, else return false.
  */
 const validUser = async (obj) => {
-  const {username, password} = obj;
+  const { username, password } = obj;
   const user = await Users.find(username);
   if (!user) return false;
   const result = await bcrypt.compare(password, user.pass);
-  if (result) return {
-    userId: user._id,
-    admin: user.admin
-  };
+  if (result) {
+    return {
+      userId: user._id,
+      admin: user.admin,
+    };
+  }
   return false;
 };
 
@@ -48,9 +50,9 @@ const validUser = async (obj) => {
  * @returns {Promise<string|boolean>} a valid cookie or false.
  */
 const logInUser = async (obj) => {
-  const {userId, admin} = await validUser(obj);
+  const { userId, admin } = await validUser(obj);
   if (userId) {
-    const token = createSignedToken({user_id: userId, admin});
+    const token = createSignedToken({ user_id: userId, admin });
     return token;
   }
   return false;
@@ -73,11 +75,28 @@ const logInUser = async (obj) => {
  */
 const signInUser = async (user) => {
   const foundUser = await Users.find(user.name || user.email);
-  if (foundUser) return null;
-  const newUser = {...user, access: true, admin: false};
+  if (foundUser) {
+    return {
+      ok: false,
+      message: 'User with the given username / email already exists',
+    };
+  }
+  const newUser = { ...user, access: true, admin: false };
   const hashedPassword = await bcrypt.hash(user.pass, saltRounds);
-  if (!hashedPassword) return null;
-  const result = await Users.insert({...newUser, pass: hashedPassword});
+  if (!hashedPassword) {
+    return {
+      ok: false,
+      message: 'The operation could not be completed successfully.',
+    };
+  }
+  const result = await Users.insert({ ...newUser, pass: hashedPassword });
+
+  // TODO: DELETE FROM HERE ||||||||||||||||||||||||||||||
+  console.log('--------------------------------');
+  console.log({ result });
+  console.log('--------------------------------');
+  // TODO: DELETE TO HERE ||||||||||||||||||||||||||||||||
+
   return result;
 };
 
